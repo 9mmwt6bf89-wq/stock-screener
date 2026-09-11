@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能炸板选股器 v5.9.6</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#0f141c;color:#e8edf2;padding:12px}
+.card{background:#1a222e;border-radius:10px;padding:14px;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid #333;padding:7px;text-align:center}
+th{background:#273242}
+.red{color:#ff6b6b}.green{color:#69db7c}.warn{color:#ffd43b}
+button{background:#337bf7;color:white;border:0;border-radius:6px;padding:8px 12px;margin:3px}
+button:disabled{background:#444}
+#log{white-space:pre-wrap;font-size:11px;color:#aaa;max-height:240px;overflow:auto}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>智能炸板选股器 v5.9.6</h2>
+<p>✅策略条件：当日炸板 | 炸板回落2~6% | 当日最低价不破前一日最低 | 振幅＜14%<br>✅RSI:55~88 | SKDJ-K:52~83.5 | MACD零轴上方 | 10日内出现涨停 | 收盘价＜20日最高</p>
+<button onclick="runScan()">开始扫描全市场</button>
+<button onclick="exportLog()">导出调试日志</button>
+<span id="status">就绪</span>
+</div>
+<div class="card"><h3>选股结果</h3>
+<table><thead><tr><th>代码</th><th>名称</th><th>收盘</th><th>炸板回落</th><th>振幅</th><th>SKDJ-K</th><th>RSI</th></tr></thead><tbody id="resultTable"></tbody></table>
+</div>
+<div class="card"><h3>系统日志</h3><div id="log"></div></div>
+
+<script>
+const CONFIG = {
+    dropRateMin:2, dropRateMax:6,
+    amplitudeMax:14,
+    rsiMin:55, rsiMax:88,
+    skdjKMin:52, skdjKMax:83.5,
+    preLimitDay:10,
+    macdAboveZero:true,
+    noBreakPreLow:true,
+    closeLess20High:true
+};
+let logList=[];
+function addLog(txt,type="SYSTEM"){
+    const t=new Date().toISOString();
+    const line=`[${t}] [${type}] ${txt}`;
+    logList.push(line);
+    document.getElementById("log").innerText=logList.slice(-50).join("\n");
+}
+function exportLog(){
+    const blob=new Blob([logList.join("\n")],{type:"text/plain"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=`选股器调试日志_${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
+}
+async function runScan(){
+    document.getElementById("status").innerText="扫描中...";
+    addLog("启动全市场扫描，策略版本v5.9.6");
+    function filterStock(stock){
+        if(!stock.isBrokenBoard) return false;
+        const drop = stock.dropRate;
+        if(drop < CONFIG.dropRateMin || drop>CONFIG.dropRateMax) return false;
+        if(stock.amplitude > CONFIG.amplitudeMax) return false;
+        if(CONFIG.noBreakPreLow && stock.low <= stock.preLow) return false;
+        if(stock.rsi < CONFIG.rsiMin || stock.rsi>CONFIG.rsiMax) return false;
+        if(stock.skdjK < CONFIG.skdjKMin || stock.skdjK>CONFIG.skdjKMax) return false;
+        if(CONFIG.macdAboveZero && !(stock.dif>0 && stock.dea>0)) return false;
+        if(!stock.hasLimitInDays(CONFIG.preLimitDay)) return false;
+        if(CONFIG.closeLess20High && stock.close >= stock.high20) return false;
+        return true;
+    }
+    addLog("选股条件加载完成，开始筛选炸板标的");
+    document.getElementById("status").innerText="扫描完成";
+    addLog("扫描结束，等待行情数据");
+}
+</script>
+</body>
+</html>
