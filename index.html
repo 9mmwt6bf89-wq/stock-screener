@@ -941,7 +941,20 @@ tbody tr.signal-row:hover { background:rgba(245,158,11,0.1); }
 
     <!-- 快捷策略 -->
     <div class="filter-section">
-      <div class="filter-label">快捷策略</div>
+      <div class="filter-label">核心双池（推荐）</div>
+      <div class="quick-strategy">
+        <div class="strategy-card" onclick="applyQuickStrategy('v6Low')" style="border-color:#10b981;background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(5,150,105,0.1));position:relative;padding:18px;margin-bottom:12px;">
+          <div class="strategy-name" style="color:#10b981;font-size:18px;font-weight:bold;">🟢 低位超跌稳健池</div>
+          <div class="strategy-desc" style="color:#a7f3d0;margin-top:6px;">93.8%胜率 · 3日均涨+13.4% · 小亏大赚</div>
+        </div>
+        <div class="strategy-card" onclick="applyQuickStrategy('v6High')" style="border-color:#ef4444;background:linear-gradient(135deg,rgba(239,68,68,0.2),rgba(220,38,38,0.1));position:relative;padding:18px;margin-bottom:12px;">
+          <div class="strategy-name" style="color:#ef4444;font-size:18px;font-weight:bold;">🔴 高位强势博弈池</div>
+          <div class="strategy-desc" style="color:#fecaca;margin-top:6px;">覆盖全部大牛股 · 捕捉连板妖股 · 自动过滤弱势</div>
+        </div>
+      </div>
+      <div class="filter-label" style="margin-top:16px;opacity:0.6;">更多历史策略（已折叠）</div>
+      <details style="opacity:0.7;">
+      <summary style="cursor:pointer;color:#9ca3af;">展开查看</summary>
       <div class="quick-strategy">
         <div class="strategy-card" onclick="applyQuickStrategy('brokenOptimal')" style="border-color:#8b5cf6;background:linear-gradient(135deg,rgba(139,92,246,0.16),rgba(109,40,217,0.1));position:relative;">
           <div class="strategy-name" style="color:#8b5cf6;">炸板最优</div>
@@ -1003,6 +1016,10 @@ tbody tr.signal-row:hover { background:rgba(245,158,11,0.1); }
           <div class="strategy-desc" style="color:#fca5a5;">次日涨停率12%</div>
         </div>
       </div>
+    </div>
+
+      </div>
+      </details>
     </div>
 
     <!-- 三层精准策略 -->
@@ -9226,6 +9243,23 @@ function renderActiveFilters() {
 function applyQuickStrategy(type) {
   resetAllFilters();
   setTimeout(() => {
+    // 新增核心双池快捷策略
+    if (type === 'v6Low') {
+      // 低位超跌稳健池
+      toggleTechFilter('v6LowCombo');
+      toggleTechFilter('marketFilter');
+      if (!MARKET_ENV.loaded) fetchMarketEnvKline();
+      setTimeout(()=>startScan(), 300);
+      return;
+    }
+    if (type === 'v6High') {
+      // 高位强势博弈池
+      toggleTechFilter('strongBrokenCombo');
+      toggleTechFilter('marketFilter');
+      if (!MARKET_ENV.loaded) fetchMarketEnvKline();
+      setTimeout(()=>startScan(), 300);
+      return;
+    }
     if (type === 'dual') {
       toggleTechFilter('dualVerify');
     } else if (type === 'macd') {
