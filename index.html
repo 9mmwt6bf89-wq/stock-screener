@@ -9242,24 +9242,24 @@ function renderActiveFilters() {
 function applyQuickStrategy(type) {
   if(type === 'v6Low'){
     resetAllFilters();
+    closeSidebar();
     setTimeout(()=>{
       toggleTechFilter('v6LowCombo');
       toggleTechFilter('marketFilter');
       if (!MARKET_ENV.loaded) fetchMarketEnvKline();
       applyFilters();
-      closeSidebar();
       startScan();
     },50);
     return;
   }
   if(type === 'v6High'){
     resetAllFilters();
+    closeSidebar();
     setTimeout(()=>{
       toggleTechFilter('strongBrokenCombo');
       toggleTechFilter('marketFilter');
       if (!MARKET_ENV.loaded) fetchMarketEnvKline();
       applyFilters();
-      closeSidebar();
       startScan();
     },50);
     return;
