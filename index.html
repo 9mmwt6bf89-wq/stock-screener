@@ -8468,7 +8468,10 @@ const DEBUG_LOG = {
   }
 };
 // 立即初始化日志（从localStorage恢复）
-try { DEBUG_LOG.init(); } catch(e) {}
+try { DEBUG_LOG.document.getElementById('stockList').innerHTML = '<div style="text-align:center;padding:40px;color:#9ca3af;">正在加载K线数据，请稍候...</div>';
+loadKline().then(()=>{
+  init();
+}); } catch(e) {}
 
 /* ===== 一键更新全部股票 ===== */
 let isUpdatingAll = false;
