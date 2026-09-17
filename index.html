@@ -1506,7 +1506,7 @@ tbody tr.signal-row:hover { background:rgba(245,158,11,0.1); }
             <tbody id="stockTableBody"></tbody>
           </table>
         </div>
-        <div class="data-notice">数据来源：东方财富实时行情 · MACD(10,20,7) SKDJ(7,3,3)基于真实日K线计算 · 本工具仅供学习研究，不构成任何投资建议，股市有风险，投资需谨慎</div>
+        <div class="data-notice">数据来源：东方财富/腾讯行情（东财故障自动切换腾讯） · MACD(10,20,7) SKDJ(7,3,3)基于真实日K线计算 · 本工具仅供学习研究，不构成任何投资建议，股市有风险，投资需谨慎</div>
       </div>
     </div>
 
@@ -1906,6 +1906,7 @@ tbody tr.signal-row:hover { background:rgba(245,158,11,0.1); }
       </div>
 
       <div style="margin-top:16px; padding-top:12px; border-top:1px solid var(--border); text-align:center; font-size:11px; color:var(--text-muted);">
+        版本 v6.9.0 · 修复东财接口拒连导致K线/实时行情不更新（2026-09-17）：①盘中实时行情：东方财富push2节点全部失败（云服务器/部分运营商IP被限流拒连）时，自动切换腾讯行情qt.gtimg.cn兜底，价格/涨跌幅/最高最低/换手率/量比字段完整映射，实时数据不再卡死 ②历史K线补全：东财超时由5秒缩短到3秒且只试1次，失败后【首选腾讯前复权日K】（与kline.json底座复权方式一致），新浪不复权降为第二备用，避免每只股票在东财上空等15秒、3000只补全永远跑不完 ③服务端每日更新脚本update_kline.py重写：腾讯主源+新浪/东财兜底，8并发约3分钟跑完全市场，腾讯网关501抖动时自动两轮低并发补刷，保证全部为前复权数据，直接输出kline.json压缩格式 ④GitHub Actions工作流修复：补充contents:write权限（否则git push 403）、改为提交kline.json、20分钟超时 ⑤kline.json底座数据更新至2026-09-16<br>
         版本 v5.6.0 · IndexedDB K线数据存储+每日收盘自动增量更新（2026-09-10）：①新增IndexedDB分股票存储K线数据，支持大数据量，启动快，离线可用 ②每日收盘后（15:30后）自动增量更新K线数据，只下载缺失的交易日数据，每天只更新一次，打开时自动检查 ③增量更新逻辑：从东财获取最近120根K线，与本地IndexedDB旧数据合并去重，只保留最近500根 ④交易日判断：自动识别周一到周五，排除2026年A股节假日（元旦/春节/清明/劳动节/端午/中秋/国庆） ⑤更新进度可视化：header显示绿色进度条，显示更新百分比和已更新股票数 ⑥"更新全部"按钮完成后后台静默增量更新K线数据到IndexedDB ⑦非交易时段、未到收盘时间、今天已更新过均自动跳过，避免重复请求 ⑧首次全量更新约2-3分钟（3000多只股票），之后每天增量更新只需1-2分钟 ⑨更新后自动重算全部指标并重新应用筛选，确保数据最新 ⑩K线数据持久化到IndexedDB，关闭选股器下次打开数据不消失，从关闭之前的数据开始更新而不是重新加载<br>
         版本 v5.5.0 · 方案10优化（新增零轴上绿柱缩小+V型反转形态，捕捉太极实业+136%大牛股）（2026-09-10）：①用户发现太极实业(600667)6月1日炸板被过滤，但后续30天最高+136%、8个涨停——检查发现太极实业是V型高点(K最低点51.52>=45)但MACD柱为负(-0.0458)，不满足强发散>0.06条件，而MACD一直在零轴之上且绿柱开始缩小即将金叉 ②新增"零轴上绿柱缩小+V型反转"形态：V型高点(K>=45) + MACD零轴上(DIF>0,DEA>0) + MACD柱>-0.1且<0 + MACD柱今天>昨天(绿柱缩小，即将金叉)——成功捕捉太极实业(6月1日MACD柱-0.0458，绿柱从-0.0480缩小到-0.0458，后续+136%) ③方案10五年回测：2041信号，胜率66.9%，均收+1.43%，涨停率37.6%，大涨率64.0%，月均34.0只——整体质量几乎没下降(胜率只降0.1%，平均收益只降0.02%) ④8只关键股票全部正确处理：大涨股(太极实业+136%🆕、中国卫星+126%、法尔胜+92%、诺德股份+32.73%、香江控股+10.48%、新乡化纤+3.31%)全部保留，亏损股(益佰制药-6.22%、富春染织-3.61%)全部过滤 ⑤优化后"炸板·强者恒强"组合：炸板+炸板回落2-8%+MACD零轴上+RSI>55+(SKDJ V型(低点<45 OR 低点>=45+强发散回调>0.06 OR 低点>=45+零轴上绿柱缩小) OR (连续强势上升 AND MACD柱>0.03))+(V型低点<45 OR SKDJ-K>52)+前20天涨停过+收盘价<前20天最高价 ⑥新增skdjVShapeHighGreenShrink指标计算，缓存持久化同步支持<br>
         版本 v5.4.9 · 方案9优化（强发散回调精确阈值>0.06+连续强势MACD柱>0.03）（2026-09-10）：①基于9个MACD柱过滤方案五年回测对比，方案9是精准和覆盖的最佳平衡点——方案对比：方案4(强发散>0.3)1327信号胜率67.8%+1.57%但错过法尔胜(+92%)、方案5/8(强发散>0.05)2011信号胜率66.4%+1.37%保留所有大涨股但信号太多、方案7(强发散>0.06+涨停>=3)1306信号胜率65.8%+1.14%错过中国卫星(+126%)、方案9(强发散>0.06)1942信号胜率67.0%+1.45%涨停率37.5%(最高)月均32.4只 ②强发散回调阈值从>0.3且重新放大降低到>0.06——法尔胜(3月11日MACD柱0.0638>0.06刚好通过，后续+92%)、中国卫星(12月18日MACD柱0.5256>0.06通过，后续+126%)、富春染织(8月10日MACD柱0.0458<0.06被过滤，后续-3.61%) ③连续强势上升增加MACD柱>0.03条件——益佰制药(8月25日连续强势+MACD柱0.0271<0.03被过滤，后续-6.22%)、新乡化纤(12月18日连续强势+MACD柱0.0501>0.03通过，后续+3.31%)、诺德股份(6月12日连续强势+MACD柱0.0819>0.03通过，后续+32.73%) ④V型低点<45不限制任何条件（低位V型反转本身就是强势信号）——香江控股(8月25日V型低点23.78<45，MACD柱-0.0468，后续+10.48%) ⑤7只关键股票全部正确处理：大涨股(中国卫星+126%、法尔胜+92%、诺德股份+32.73%、香江控股+10.48%、新乡化纤+3.31%)全部保留，亏损股(益佰制药-6.22%、富春染织-3.61%)全部过滤 ⑥优化后"炸板·强者恒强"组合：炸板+炸板回落2-8%+MACD零轴上+RSI>55+(SKDJ V型(低点<45 OR 低点>=45+强发散回调>0.06) OR (连续强势上升 AND MACD柱>0.03))+(V型低点<45 OR SKDJ-K>52)+前20天涨停过+收盘价<前20天最高价 ⑦五年闭环回测：1942次信号，胜率67.0%，均收+1.45%，大涨率64.1%，涨停率37.5%(最高)，月均32.4只<br>
@@ -6477,7 +6478,47 @@ async function fetchRealtimeQuotes(codes, retryLeft) {
     // 递增退避后重试（原250ms，缩短到100ms）
     if (attempt < retryLeft) await new Promise(r => setTimeout(r, 100 * (attempt + 1)));
   }
+  // v6.9新增（2026-09-17）：东财全部节点失败后，切换腾讯行情接口兜底
+  // 背景：东财push2节点对云服务器/部分运营商IP限流或直接拒连，导致盘中实时数据不更新
+  try {
+    console.warn('东方财富行情节点全部失败，切换腾讯行情(qt.gtimg.cn)兜底...');
+    const tc = await fetchTencentQuotesByCodes(codes);
+    if (tc && Object.keys(tc).length > 0) return tc;
+  } catch(eTc) {
+    console.warn('腾讯行情兜底也失败:', eTc && eTc.message);
+  }
   return {};
+}
+
+/* v6.9新增：纯代码数组走腾讯行情，结果映射为东财格式，作为东财失败时的兜底 */
+async function fetchTencentQuotesByCodes(codes, chunkSize) {
+  chunkSize = chunkSize || 60; // qt.gtimg.cn单批控制在60只，避免URL过长
+  const out = {};
+  for (let i = 0; i < codes.length; i += chunkSize) {
+    const objs = codes.slice(i, i + chunkSize).map(c => ({
+      code: c,
+      market: (c.startsWith('6') || c.startsWith('9')) ? 'sh' : 'sz'
+    }));
+    try {
+      const r = await fetchTencentRealtimeQuotes(objs);
+      Object.keys(r || {}).forEach(code => {
+        const q = r[code];
+        if (!q || !q.close) return;
+        const num0 = v => (v === null || v === undefined || isNaN(v)) ? 0 : v;
+        out[code] = {
+          price: num0(q.close),
+          change: q.changePct !== null && q.changePct !== undefined ? q.changePct : 0,
+          high: num0(q.high),
+          low: num0(q.low),
+          open: num0(q.open),
+          prevClose: num0(q.prevClose),
+          turnoverRate: (q.turnoverRate === null || q.turnoverRate === undefined) ? null : q.turnoverRate,
+          volumeRatio: (q.volumeRatio === null || q.volumeRatio === undefined) ? null : q.volumeRatio
+        };
+      });
+    } catch(e) { /* 单批失败继续下一批 */ }
+  }
+  return out;
 }
 
 /* 分批更新全部股票的真实数据（统一实时管线：价格→今日K线→完整重算指标→刷新预警池）
@@ -6665,7 +6706,7 @@ let histFillTotal = 0;
 
 async function fetchHistoricalKline(code, retryLeft) {
   if (!code) return null;
-  if (retryLeft === undefined) retryLeft = 2; // v5.7.0优化：重试次数从4次减少到2次，避免等待时间过长
+  if (retryLeft === undefined) retryLeft = 0; // v6.9(2026-09-17)：东财云IP频繁拒连，只试1次快速失败，尽快切腾讯源
   const secid = (code.startsWith('6') || code.startsWith('9')) ? '1.'+code : '0.'+code;
   for (let attempt = 0; attempt <= retryLeft; attempt++) {
     const host = HIST_KLINE_HOSTS[attempt % HIST_KLINE_HOSTS.length];
@@ -6673,7 +6714,7 @@ async function fetchHistoricalKline(code, retryLeft) {
       '&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58&klt=101&fqt=1&end=20500101&lmt=120&ut=bd1d9ddb04089700cf9c27f6f742628';
     try {
       const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 5000); // v5.7.0优化：超时时间从10秒缩短到5秒
+      const timer = setTimeout(() => ctrl.abort(), 3000); // v6.9：5秒缩短到3秒，东财不通时快速切源
       const resp = await fetch(url, { signal: ctrl.signal, headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Referer': 'https://quote.eastmoney.com/'} });
       clearTimeout(timer);
       const data = await resp.json();
@@ -6697,36 +6738,7 @@ async function fetchHistoricalKline(code, retryLeft) {
     }
     if (attempt < retryLeft) await new Promise(r => setTimeout(r, 200 * (attempt + 1))); // v5.7.0优化：重试间隔从300ms缩短到200ms
   }
-  // v5.7.1新增：东方财富API失败后，尝试新浪财经备用数据源
-  try {
-    console.log('[KLINE_DEBUG] 尝试新浪财经备用数据源:', code);
-    try { klineDebugLog(`K线调试: ${code} 尝试新浪财经备用数据源`); } catch(e) {}
-    const sinaUrl = 'https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=' + 
-      (code.startsWith('6') ? 'sh' : 'sz') + code + '&scale=240&ma=no&datalen=120';
-    const ctrl2 = new AbortController();
-    const timer2 = setTimeout(() => ctrl2.abort(), 8000);
-    const resp2 = await fetch(sinaUrl, { signal: ctrl2.signal, headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Referer': 'https://finance.sina.com.cn/'} });
-    clearTimeout(timer2);
-    const text2 = await resp2.text();
-    console.log('[KLINE_DEBUG] 新浪财经返回:', code, 'status:', resp2.status, 'text:', text2.substring(0, 500));
-    try { klineDebugLog(`K线调试: ${code} 新浪返回 status=${resp2.status} text=${text2.substring(0, 200)}`); } catch(e) {}
-    // 新浪返回的是JSON数组格式 [{day:"2024-01-01",open:"10.0",high:"10.5",low:"9.8",close:"10.2",volume:"100000"}, ...]
-    const sinaData = JSON.parse(text2);
-    if (Array.isArray(sinaData) && sinaData.length > 0) {
-      return sinaData.map(k => ({
-        date: k.day,
-        open: parseFloat(k.open),
-        close: parseFloat(k.close),
-        high: parseFloat(k.high),
-        low: parseFloat(k.low),
-        volume: parseFloat(k.volume) || 0
-      }));
-    }
-  } catch(eSina) {
-    console.log('[KLINE_DEBUG] 新浪财经备用数据源失败:', code, 'error:', eSina.message);
-    try { klineDebugLog(`K线调试: ${code} 新浪备用失败 ${eSina.message}`); } catch(e) {}
-  }
-  // v5.7.2新增：新浪财经失败后，尝试腾讯财经备用数据源（支持跨域，非交易时段也能返回数据）
+  // v6.9(2026-09-17)：东财失败后【首选腾讯】前复权日K（与kline.json底座复权方式一致，云服务器IP稳定）
   try {
     console.log('[KLINE_DEBUG] 尝试腾讯财经备用数据源:', code);
     try { klineDebugLog(`K线调试: ${code} 尝试腾讯财经备用数据源`); } catch(e) {}
@@ -6737,10 +6749,8 @@ async function fetchHistoricalKline(code, retryLeft) {
     const resp3 = await fetch(tencentUrl, { signal: ctrl3.signal, headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Referer': 'https://gu.qq.com/'} });
     clearTimeout(timer3);
     const text3 = await resp3.text();
-    console.log('[KLINE_DEBUG] 腾讯财经返回:', code, 'status:', resp3.status, 'text:', text3.substring(0, 500));
-    try { klineDebugLog(`K线调试: ${code} 腾讯返回 status=${resp3.status} text=${text3.substring(0, 200)}`); } catch(e) {}
     const tencentData = JSON.parse(text3);
-    // 腾讯财经返回格式: {code:0, msg:"", data:{sh600000:{qfqday:[["2024-01-01","10.0","10.5","9.8","10.2","100000",...], ...]}}}
+    // 腾讯财经返回格式: {code:0, msg:"", data:{sh600000:{qfqday:[["日期","开","收","高","低","量",...], ...]}}}
     if (tencentData && tencentData.data && tencentData.data[tencentCode]) {
       const stockData = tencentData.data[tencentCode];
       const klineArray = stockData.qfqday || stockData.day || [];
@@ -6758,6 +6768,33 @@ async function fetchHistoricalKline(code, retryLeft) {
   } catch(eTencent) {
     console.log('[KLINE_DEBUG] 腾讯财经备用数据源失败:', code, 'error:', eTencent.message);
     try { klineDebugLog(`K线调试: ${code} 腾讯备用失败 ${eTencent.message}`); } catch(e) {}
+  }
+  // v6.9：腾讯失败后，再尝试新浪财经（不复权，仅兜底，近期除权股可能有跳空）
+  try {
+    console.log('[KLINE_DEBUG] 尝试新浪财经备用数据源:', code);
+    try { klineDebugLog(`K线调试: ${code} 尝试新浪财经备用数据源`); } catch(e) {}
+    const sinaUrl = 'https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=' +
+      (code.startsWith('6') ? 'sh' : 'sz') + code + '&scale=240&ma=no&datalen=120';
+    const ctrl2 = new AbortController();
+    const timer2 = setTimeout(() => ctrl2.abort(), 8000);
+    const resp2 = await fetch(sinaUrl, { signal: ctrl2.signal, headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Referer': 'https://finance.sina.com.cn/'} });
+    clearTimeout(timer2);
+    const text2 = await resp2.text();
+    // 新浪返回的是JSON数组格式 [{day:"2024-01-01",open:"10.0",high:"10.5",low:"9.8",close:"10.2",volume:"100000"}, ...]
+    const sinaData = JSON.parse(text2);
+    if (Array.isArray(sinaData) && sinaData.length > 0) {
+      return sinaData.map(k => ({
+        date: k.day,
+        open: parseFloat(k.open),
+        close: parseFloat(k.close),
+        high: parseFloat(k.high),
+        low: parseFloat(k.low),
+        volume: parseFloat(k.volume) || 0
+      }));
+    }
+  } catch(eSina) {
+    console.log('[KLINE_DEBUG] 新浪财经备用数据源失败:', code, 'error:', eSina.message);
+    try { klineDebugLog(`K线调试: ${code} 新浪备用失败 ${eSina.message}`); } catch(e) {}
   }
   // v5.7.3新增：腾讯财经fetch方式失败后，尝试JSONP方式绕过跨域限制
   try {
@@ -7195,13 +7232,18 @@ function fetchTencentRealtimeQuotes(stockCodes) {
           const varName = 'v_' + prefix + s.code;
           if (window[varName]) {
             const parts = window[varName].split('~');
-            if (parts.length > 34) {
+            if (parts.length > 46) {
+              const _pn = v => { const n = parseFloat(v); return isNaN(n) ? null : n; };
               results[s.code] = {
-                close: parseFloat(parts[3]),    // 当前价/收盘价
-                high: parseFloat(parts[33]),  // 最高
-                low: parseFloat(parts[34]),    // 最低
-                open: parseFloat(parts[5]),    // 今开
-                volume: parseFloat(parts[6]) || 0  // 成交量
+                close: _pn(parts[3]),    // 当前价/收盘价
+                high: _pn(parts[33]),    // 最高
+                low: _pn(parts[34]),     // 最低
+                open: _pn(parts[5]),     // 今开
+                volume: _pn(parts[6]) || 0,  // 成交量（手）
+                prevClose: _pn(parts[4]),    // 昨收（v6.9新增，东财兜底用）
+                changePct: _pn(parts[32]),   // 涨跌幅%（v6.9新增）
+                turnoverRate: _pn(parts[38]),// 换手率%（v6.9新增）
+                volumeRatio: _pn(parts[46])  // 量比（v6.9新增）
               };
             }
           }
@@ -10781,7 +10823,7 @@ document.getElementById('strategyModal').addEventListener('click', function(e) {
 
 /* ===== 启动 ===== */
 // v5.6.4修复：APP_VERSION必须在init()之前定义，否则init函数中引用APP_VERSION会报错导致init中断
-const APP_VERSION = 'v5.8.0';
+const APP_VERSION = 'v6.9.0';
 init();
 
 // 注册Service Worker（PWA离线支持）
